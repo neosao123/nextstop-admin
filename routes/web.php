@@ -38,6 +38,7 @@ use App\Http\Controllers\WelcomeController;
 use App\Http\Controllers\EnquiryController;
 use App\Classes\FCMNotify;
 use App\Http\Controllers\CronjobController;
+use App\Http\Controllers\AdminCommissionController;
 
 /*
 |--------------------------------------------------------------------------
@@ -657,6 +658,18 @@ Route::group(['middleware' => ['PreventBack']], function () {
          * --------------------------------------------------------------------------------------------------- */
         Route::get('enquiry', [EnquiryController::class, 'index'])->middleware(['permission:Enquiry.List,admin']);
         Route::get('enquiry/list', [EnquiryController::class, 'list'])->middleware(['permission:Enquiry.List,admin']);
+		
+
+		/** --------------------------------------------------------------------------------------------------
+         * Reports - Commission
+         * --------------------------------------------------------------------------------------------------- */
+        Route::group(['prefix' => 'reports/commission'], function () {
+            Route::get('/', [AdminCommissionController::class, 'index']);
+            Route::get('/list', [AdminCommissionController::class, 'list']);
+            Route::get('/excel-download', [AdminCommissionController::class, 'excel_download']);
+            Route::get('/pdf-download', [AdminCommissionController::class, 'pdf_download']);
+            Route::get('/fetch/driver', [AdminCommissionController::class, 'get_drivers']);
+        });
 		
 		
     });
