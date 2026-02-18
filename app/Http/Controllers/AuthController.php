@@ -75,7 +75,7 @@ class AuthController extends Controller
 					$r->session()->flash('fail', 'Your account is inactive, please contact the administrator to activate it.');
                     return redirect('login');
 				}
-				if (Auth::guard('admin')->attempt(['email' => $email, 'password' => $password])) {
+                if (Auth::guard('admin')->attempt(['email' => $email, 'password' => $password])) {
                     Auth::login($result);
                     $email = Auth::guard('admin')->user()->email;
                     $r->session()->put('SUPERUSER_LOGIN', true);
@@ -86,19 +86,20 @@ class AuthController extends Controller
                         if (Cookie::get('email')) Cookie::queue('email', '');
                         if (Cookie::get('password')) Cookie::queue('password', '');
                     }
-                    //return redirect('/dashboard');
+                    
+                    $role = Auth::guard( 'admin' )->user()->role_id;
+                
+                    if($role==1){
+                         return redirect( 'dashboard' );
+                    }else{
+                          if(Auth::guard('admin')->user()->can('Dashboard.View')){
+                               return redirect('dashboard');
+                          }else{
+                                return redirect('welcome');
+                          }
+                    }
                 }
-				$role = Auth::guard( 'admin' )->user()->role_id;
-				
-				if($role==1){
-					 return redirect( 'dashboard' );
-				}else{
-					  if(Auth::guard('admin')->user()->can('Dashboard.View')){
-						   return redirect('dashboard');
-					  }else{
-							return redirect('welcome');
-					  }
-				}
+                
                 $r->session()->flash('error', 'Invalid Email or password.');
                 return redirect('login');
             }
@@ -106,6 +107,7 @@ class AuthController extends Controller
 	   }catch (\Exception $ex) {
 	        //error log
 			LogHelper::logError('An error occurred while admin login', $ex->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, '');
+            return redirect('login')->with('error', 'An error occurred while logging in.');
        }
     }
 	
