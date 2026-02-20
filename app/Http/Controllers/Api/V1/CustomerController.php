@@ -983,6 +983,9 @@ class CustomerController extends Controller
 			$vehicle = Vehicle::with("vehicleType")
 				->where("vehicles.is_active", 1)
 				->where("vehicles.is_delete", 0)
+				->whereHas('vehicleType', function ($query) {
+					$query->where('is_active', 1)->where('is_delete', 0);
+				})
 				->get();
 			$vehicleArray = [];
 			if ($vehicle && count($vehicle) > 0) {
