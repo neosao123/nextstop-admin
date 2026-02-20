@@ -53,6 +53,7 @@ class DriverController extends Controller
         "+919373939082",
         "9373939082",
         "7385566988",
+        "8421007927"
     ];
 
     //otp for driver
@@ -419,6 +420,7 @@ class DriverController extends Controller
                 
                 // Generate OTP for the mobile number
                 $otpNumber = $this->generateOTP($r->mobileNumber);
+                // $otpNumber = "123456";
 
                 // Check if OTP generation is successful
                 if ($otpNumber != false) {
@@ -460,6 +462,7 @@ class DriverController extends Controller
                 }
                 // Generate OTP for the mobile number
                 $otpNumber = $this->generateOTP($r->mobileNumber);
+                
 
                 // Optional: Skip sending OTP for specific number
                 if (!in_array($r->mobileNumber, $this->testingMobileNumbers)) {
@@ -2450,6 +2453,9 @@ class DriverController extends Controller
 
             if (!empty($customer)) {
                 if (!empty($customer->customer_firebase_token)) {
+                    $statusMessage = "";
+                    $title = "";
+
                     if ($r->status == "accepted") {
                         $statusMessage = "Trip is accepted by partner";
                         $title = "Trip Accepted";
@@ -2459,17 +2465,25 @@ class DriverController extends Controller
                         $title = "Trip Start";
                     }
 
-                    $DeviceIdsArr[] = $customer->customer_firebase_token;
-                    $dataArr = array();
-                    $dataArr['device_id'] = $DeviceIdsArr;
-                    $dataArr['message'] = $statusMessage;
-                    $dataArr['title'] = $title;
-                    $notification['device_id'] = $DeviceIdsArr;
-                    $notification['message'] = $statusMessage;
-                    $notification['title'] = $title;
-                    $noti = new Notificationlibv_3;
-                    $result = $noti->sendNotification($dataArr, $notification);
-                    Log::info("Trip status change notification result", ['result' => $result]);
+                    if ($statusMessage != "" && $title != "") {
+                        try {
+                            $DeviceIdsArr = array();
+                            $DeviceIdsArr[] = $customer->customer_firebase_token;
+                            $dataArr = array();
+                            $dataArr['device_id'] = $DeviceIdsArr;
+                            $dataArr['message'] = $statusMessage;
+                            $dataArr['title'] = $title;
+                            $notification = array();
+                            $notification['device_id'] = $DeviceIdsArr;
+                            $notification['message'] = $statusMessage;
+                            $notification['title'] = $title;
+                            $noti = new Notificationlibv_3;
+                            $result = $noti->sendNotification($dataArr, $notification);
+                            Log::info("Trip status change notification result", ['result' => $result]);
+                        } catch (\Exception $e) {
+                            Log::error("Error sending notification in trip_status_change: " . $e->getMessage());
+                        }
+                    }
                 }
             }
             if ($r->status == "accepted") {
@@ -2478,8 +2492,8 @@ class DriverController extends Controller
                 return response()->json(["status" => 200, "message" => "Trip is now started"], 200);
             }
         } catch (\Exception $e) {
-            LogHelper::logError('An error occurred while changing change status.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, "");
-            return response()->json(['status' => 400, 'message' => 'Something went wrong.'], 400);
+            LogHelper::logError('An error occurred while changing status.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, "");
+            return response()->json(['status' => 400, 'message' => 'Something went wrong.' . $e->getMessage()], 400);
         }
     }
   
@@ -2689,7 +2703,7 @@ class DriverController extends Controller
 
 
                 // Check if paymentType is "cod" and paymentStatus is not 1
-                if ($input['paymentType'] === 'cod' && $input['paymentStatus'] != 1) {
+                if ($r->paymentType === 'cod' && $r->paymentStatus != 1) {
                     return response()->json([
                         "message" => "Please collect cash first as payment type is COD."
                     ], 300);
@@ -2735,22 +2749,22 @@ class DriverController extends Controller
                 $driverEarning->paymentMode = $r->paymentType;
                 $driverEarning->save();
 
-                LogHelper::logSuccess('partner transaction recorded successfully', [
+                LogHelper::logSuccess('partner transaction recorded successfully', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, json_encode([
                     'trip_id' => $r->tripId,
                     'driver_id' => $r->driverId,
                     'amount' => $driverShare,
-                ], __FUNCTION__, basename(__FILE__), __LINE__);
+                ]));
 
                 // Update driver's wallet
                 $driver = Driver::find($r->driverId);
                 if ($driver) {
 
-                    if ($input['paymentType'] === 'online') {
+                    if ($r->paymentType === 'online') {
                         $driver->driver_wallet += $driverShare;
                         $driver->save();
                     }
 
-                    if ($input['paymentType'] === 'cod') {
+                    if ($r->paymentType === 'cod') {
                         $driver->driver_wallet -= $adminShare;
                         $driver->save();
                     }
@@ -2763,13 +2777,13 @@ class DriverController extends Controller
 						$driverEarning->message=$adminShare.' amount is deduct against trip - ' . $trip->trip_unique_id;
 						$driverEarning->amount=$adminShare;
 						$driverEarning->status="success";
-						$driverEarning->paymentMode=$input['paymentType'];
+						$driverEarning->paymentMode=$r->paymentType;
 						$driverEarning->save(); */
 
-                    LogHelper::logSuccess('partner wallet updated successfully', [
+                    LogHelper::logSuccess('partner wallet updated successfully', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, json_encode([
                         'driver_id' => $r->driverId,
                         'updated_wallet_amount' => $driver->driver_wallet,
-                    ], __FUNCTION__, basename(__FILE__), __LINE__);
+                    ]));
                 }
 
                 //admin commission
@@ -2785,11 +2799,11 @@ class DriverController extends Controller
                 $adminTransaction->save();
 
 
-                LogHelper::logSuccess('Admin commission recorded successfully', [
+                LogHelper::logSuccess('Admin commission recorded successfully', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, json_encode([
                     'trip_id' => $r->tripId,
                     'commission_percentage' => $commission,
                     'commission_amount' => $adminShare,
-                ], __FUNCTION__, basename(__FILE__), __LINE__);
+                ]));
 
 
                 //send notification to customer 
@@ -2797,20 +2811,24 @@ class DriverController extends Controller
                 $customer = Customer::find($trip->trip_customer_id);
                 if (!empty($customer)) {
                     if (!empty($customer->customer_firebase_token)) {
-                        $statusMessage = "Trip completed successfully.";
-                        $title = "Trip completed";
+                        try {
+                            $statusMessage = "Trip completed successfully.";
+                            $title = "Trip completed";
 
-                        $DeviceIdsArr[] = $customer->customer_firebase_token;
-                        $dataArr = array();
-                        $dataArr['device_id'] = $DeviceIdsArr;
-                        $dataArr['message'] = $statusMessage;
-                        $dataArr['title'] = $title;
-                        $notification['device_id'] = $DeviceIdsArr;
-                        $notification['message'] = $statusMessage;
-                        $notification['title'] = $title;
-                        $noti = new Notificationlibv_3;
-                        $result = $noti->sendNotification($dataArr, $notification);
-                        Log::info("Trip completed notification result", ['result' => $result]);
+                            $DeviceIdsArr[] = $customer->customer_firebase_token;
+                            $dataArr = array();
+                            $dataArr['device_id'] = $DeviceIdsArr;
+                            $dataArr['message'] = $statusMessage;
+                            $dataArr['title'] = $title;
+                            $notification['device_id'] = $DeviceIdsArr;
+                            $notification['message'] = $statusMessage;
+                            $notification['title'] = $title;
+                            $noti = new Notificationlibv_3;
+                            $result = $noti->sendNotification($dataArr, $notification);
+                            Log::info("Trip completed notification result", ['result' => $result]);
+                        } catch (\Exception $e) {
+                            Log::error("Failed to send trip completed notification: " . $e->getMessage());
+                        }
                     }
                 }
 
