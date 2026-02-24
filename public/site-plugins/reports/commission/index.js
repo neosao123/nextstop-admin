@@ -7,7 +7,7 @@ $(function () {
         dateFormat: "d-m-Y",
         allowInput: true
     });
-    
+
     // Select2 - Driver 
     $('#driver').select2({
         placeholder: 'Select Driver',
@@ -18,10 +18,10 @@ $(function () {
                 return 'Please enter 1 or more characters';
             },
             searching: function () {
-                return 'Searching...'; 
+                return 'Searching...';
             },
             noResults: function () {
-                return 'No data found'; 
+                return 'No data found';
             }
         },
         ajax: {
@@ -55,12 +55,12 @@ $(function () {
         $("#to_date").val("");
         getDataTable();
     });
-    
+
     $("#btnExcelDownload").on("click", function (e) {
         var driver = $("#driver").val();
         var from_date = $("#from_date").val();
         var to_date = $("#to_date").val();
-        
+
         $.ajax({
             type: "get",
             url: baseUrl + "/reports/commission/excel-download",
@@ -91,7 +91,7 @@ $(function () {
         var driver = $("#driver").val();
         var from_date = $("#from_date").val();
         var to_date = $("#to_date").val();
-        
+
         $.ajax({
             type: "get",
             url: baseUrl + "/reports/commission/pdf-download",
@@ -139,6 +139,17 @@ $(function () {
                     to_date: to_date
                 }
             },
+            drawCallback: function (settings) {
+                var api = this.api();
+                var count = api.page.info().recordsDisplay;
+                if (count === 0) {
+                    $('#btnExcelDownload').prop('disabled', true);
+                    $('#btnPdfDownload').prop('disabled', true);
+                } else {
+                    $('#btnExcelDownload').prop('disabled', false);
+                    $('#btnPdfDownload').prop('disabled', false);
+                }
+            }
         });
     }
 });

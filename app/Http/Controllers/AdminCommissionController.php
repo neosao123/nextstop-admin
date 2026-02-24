@@ -62,7 +62,6 @@ class AdminCommissionController extends Controller
                 $dataRow[] = ($row->driver ? $row->driver->driver_first_name : '') . ' ' . ($row->driver ? $row->driver->driver_last_name : '');
                 $dataRow[] = $row->type ?? '-';
                 $dataRow[] = $row->commission_percentage ?? '0';
-                $dataRow[] = $row->subtotal ?? '0';
                 $dataRow[] = $row->commission_amount ?? '0';
                 $dataRow[] = $row->grand_total ?? '0';
                 $dataRow[] = $createdDate;
@@ -95,6 +94,7 @@ class AdminCommissionController extends Controller
             $result = Driver::where(function ($query) use ($search) {
                     $query->where('driver_first_name', 'like', '%' . $search . '%')
                           ->orWhere('driver_last_name', 'like', '%' . $search . '%')
+                          ->orWhereRaw("CONCAT(driver_first_name, ' ', driver_last_name) LIKE ?", ["%{$search}%"])
                           ->orWhere('driver_phone', 'like', '%' . $search . '%');
                 })
                 ->where("is_active", 1)
@@ -141,7 +141,6 @@ class AdminCommissionController extends Controller
                     'Driver Name' => ($row->driver ? $row->driver->driver_first_name : '') . ' ' . ($row->driver ? $row->driver->driver_last_name : ''),
                     'Type' => $row->type ?? '-',
                     'Commission Percentage' => $row->commission_percentage ?? '0',
-                    'Subtotal' => $row->subtotal ?? '0',
                     'Commission Amount' => $row->commission_amount ?? '0',
                     'Grand Total' => $row->grand_total ?? '0',
                     'Date' => $createdDate,
@@ -216,7 +215,6 @@ class AdminCommissionController extends Controller
                                     <th>Driver Name</th>
                                     <th>Type</th>
                                     <th>Commission %</th>
-                                    <th>Subtotal</th>
                                     <th>Commission Amount</th>
                                     <th>Grand Total</th>
                                     <th>Date</th>
@@ -232,7 +230,6 @@ class AdminCommissionController extends Controller
                 $htmlContent .= '<td>' . (($row->driver ? $row->driver->driver_first_name : '') . ' ' . ($row->driver ? $row->driver->driver_last_name : '')) . '</td>';
                 $htmlContent .= '<td>' . ($row->type ?? '-') . '</td>';
                 $htmlContent .= '<td>' . ($row->commission_percentage ?? '0') . '</td>';
-                $htmlContent .= '<td>' . ($row->subtotal ?? '0') . '</td>';
                 $htmlContent .= '<td>' . ($row->commission_amount ?? '0') . '</td>';
                 $htmlContent .= '<td>' . ($row->grand_total ?? '0') . '</td>';
                 $htmlContent .= '<td>' . $createdDate . '</td>';
