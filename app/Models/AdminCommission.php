@@ -55,6 +55,7 @@ class AdminCommission extends Model
             $query->where(function ($query) use ($search) {
                 $query->where('drivers.driver_first_name', 'like', "%{$search}%")
                       ->orWhere('drivers.driver_last_name', 'like', "%{$search}%")
+                      ->orWhereRaw("CONCAT(drivers.driver_first_name, ' ', drivers.driver_last_name) LIKE ?", ["%{$search}%"])
                       ->orWhere('trips.trip_unique_id', 'like', "%{$search}%")
                       ->orWhere('admin_commissions.type', 'like', "%{$search}%")
                       ->orWhere('admin_commissions.commission_amount', 'like', "%{$search}%")

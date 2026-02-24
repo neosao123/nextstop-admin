@@ -93,14 +93,13 @@
             <div class="card mb-3">
                 <div class="card-body">
                     <div class="table-responsive scrollbar">
-                        <table id="dt-commission" class="table table-hover">
+                        <table id="dt-commission" class="table table-hover text-nowrap">
                             <thead>
                                 <tr>
                                     <th scope="col">Trip ID</th>
                                     <th scope="col">Driver Name</th>
                                     <th scope="col">Type</th>
                                     <th scope="col">Commission %</th>
-                                    <th scope="col">Subtotal</th>
                                     <th scope="col">Commission Amount</th>
                                     <th scope="col">Grand Total</th>
                                     <th scope="col">Date</th>
