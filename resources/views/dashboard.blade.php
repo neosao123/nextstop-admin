@@ -115,6 +115,49 @@
                 </div>
             </div>
         </div>
+
+        <div class="col-sm-6 col-md-4">
+            <div class="card overflow-hidden" style="min-width: 12rem">
+                <div class="bg-holder bg-card"
+                    style="background-image:url(../assets/img/icons/spot-illustrations/corner-1.png);"></div>
+                <!--/.bg-holder-->
+                <div class="card-body position-relative">
+                    <h6>Total Commission<span class="badge badge-subtle-primary rounded-pill ms-2"></span></h6>
+                    <div class="display-4 fs-5 mb-2 fw-normal font-sans-serif text-primary">₹
+                        {{ number_format($totalCommission ?? 0, 2) }}</div>
+                    <a class="fw-semi-bold fs-10 text-nowrap" href="{{ url('reports/commission') }}">See all<span
+                            class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6 col-md-4">
+            <div class="card overflow-hidden" style="min-width: 12rem">
+                <div class="bg-holder bg-card"
+                    style="background-image:url(../assets/img/icons/spot-illustrations/corner-2.png);"></div>
+                <!--/.bg-holder-->
+                <div class="card-body position-relative">
+                    <h6>This Month's Commission<span class="badge badge-subtle-success rounded-pill ms-2"></span></h6>
+                    <div class="display-4 fs-5 mb-2 fw-normal font-sans-serif text-primary">₹
+                        {{ number_format($thisMonthCommission ?? 0, 2) }}</div>
+                    <a class="fw-semi-bold fs-10 text-nowrap" href="{{ url('reports/commission') }}">See all<span
+                            class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-4 col-md-4">
+            <div class="card overflow-hidden" style="min-width: 12rem">
+                <div class="bg-holder bg-card"
+                    style="background-image:url(../assets/img/icons/spot-illustrations/corner-3.png);"></div>
+                <!--/.bg-holder-->
+                <div class="card-body position-relative">
+                    <h6>Today's Commission<span class="badge badge-subtle-info rounded-pill ms-2"></span></h6>
+                    <div class="display-4 fs-5 mb-2 fw-normal font-sans-serif text-primary">₹
+                        {{ number_format($todayCommission ?? 0, 2) }}</div>
+                    <a class="fw-semi-bold fs-10 text-nowrap" href="{{ url('reports/commission') }}">See all<span
+                            class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="row g-3 mb-4">
         <div class="col-sm-12 col-md-12 col-lg-12">

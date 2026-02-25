@@ -11,6 +11,7 @@ use App\Models\Customer;
 use App\Models\Trip;
 // Helper
 use App\Helpers\LogHelper;
+use App\Models\AdminCommission;
 use DB;
 use Illuminate\Support\Facades\Auth;
 
@@ -61,7 +62,15 @@ class DashboardController extends Controller
             ->where("is_delete", 0)
             ->count();
 
-        return view("dashboard", compact("user", "verifiedCount", "pendingCount", "totalCustomer", "trips", "totalCancelTrip"));
+        // Commissions
+        $totalCommission = AdminCommission::sum('commission_amount');
+        $thisMonthCommission = AdminCommission::whereMonth('created_at', Carbon::now()->month)
+                                              ->whereYear('created_at', Carbon::now()->year)
+                                              ->sum('commission_amount');
+        $todayCommission = AdminCommission::whereDate('created_at', Carbon::now()->toDateString())
+                                          ->sum('commission_amount');
+
+        return view("dashboard", compact("user", "verifiedCount", "pendingCount", "totalCustomer", "trips", "totalCancelTrip", "totalCommission", "thisMonthCommission", "todayCommission"));
     }
     //welcome page 
 

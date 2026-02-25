@@ -130,6 +130,11 @@ $(function () {
             ordering: false,
             searching: true,
             paging: true,
+            columnDefs: [
+                { className: "text-start", targets: [0, 1, 2] },
+                { className: "text-end", targets: [3, 4, 5] },
+                { className: "text-center", targets: [6] }
+            ],
             ajax: {
                 url: baseUrl + "/reports/commission/list",
                 type: "GET",
@@ -149,6 +154,11 @@ $(function () {
                     $('#btnExcelDownload').prop('disabled', false);
                     $('#btnPdfDownload').prop('disabled', false);
                 }
+
+                // Show limit-wise total dynamically sent from backend inside table footer
+                var response = settings.json;
+                var total = (response && response.totalCommissionLimit) ? '₹ ' + response.totalCommissionLimit : '₹ 0.00';
+                $(api.column(4).footer()).html('<b>' + total + '</b>');
             }
         });
     }
