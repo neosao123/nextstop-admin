@@ -139,7 +139,7 @@
                     <h6>This Month's Commission<span class="badge badge-subtle-success rounded-pill ms-2"></span></h6>
                     <div class="display-4 fs-5 mb-2 fw-normal font-sans-serif text-primary">₹
                         {{ number_format($thisMonthCommission ?? 0, 2) }}</div>
-                    <a class="fw-semi-bold fs-10 text-nowrap" href="{{ url('reports/commission') }}">See all<span
+                    <a class="fw-semi-bold fs-10 text-nowrap" href="{{ url('reports/commission?filter=month') }}">See all<span
                             class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
                 </div>
             </div>
@@ -153,7 +153,7 @@
                     <h6>Today's Commission<span class="badge badge-subtle-info rounded-pill ms-2"></span></h6>
                     <div class="display-4 fs-5 mb-2 fw-normal font-sans-serif text-primary">₹
                         {{ number_format($todayCommission ?? 0, 2) }}</div>
-                    <a class="fw-semi-bold fs-10 text-nowrap" href="{{ url('reports/commission') }}">See all<span
+                    <a class="fw-semi-bold fs-10 text-nowrap" href="{{ url('reports/commission?filter=today') }}">See all<span
                             class="fas fa-angle-right ms-1" data-fa-transform="down-1"></span></a>
                 </div>
             </div>
