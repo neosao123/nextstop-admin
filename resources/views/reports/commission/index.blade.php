@@ -96,16 +96,23 @@
                         <table id="dt-commission" class="table table-hover text-nowrap">
                             <thead>
                                 <tr>
-                                    <th scope="col">Trip ID</th>
-                                    <th scope="col">Driver Name</th>
-                                    <th scope="col">Type</th>
-                                    <th scope="col">Commission %</th>
-                                    <th scope="col">Commission Amount</th>
-                                    <th scope="col">Grand Total</th>
-                                    <th scope="col">Date</th>
+                                    <th scope="col" class="text-start">Trip ID</th>
+                                    <th scope="col" class="text-start">Driver Name</th>
+                                    <th scope="col" class="text-start">Type</th>
+                                    <th scope="col" class="text-end">Commission %</th>
+                                    <th scope="col" class="text-end">Commission Amount</th>
+                                    <th scope="col" class="text-end">Order Amount</th>
+                                    <th scope="col" class="text-center">Date</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="4" class="text-end">Limit Wise Total Commission:</th>
+                                    <th class="text-end"></th> <!-- This will hold the total -->
+                                    <th colspan="2" class="text-end"></th> <!-- Empty cells for remaining columns -->
+                                </tr>
+                            </tfoot>
                         </table>
                     </div>
                 </div>

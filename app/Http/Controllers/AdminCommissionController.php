@@ -26,7 +26,14 @@ class AdminCommissionController extends Controller
     public function index()
     {
         try {
-            return view('reports.commission.index');
+            $totalCommission = AdminCommission::sum('commission_amount');
+            $thisMonthCommission = AdminCommission::whereMonth('created_at', Carbon::now()->month)
+                                                  ->whereYear('created_at', Carbon::now()->year)
+                                                  ->sum('commission_amount');
+            $todayCommission = AdminCommission::whereDate('created_at', Carbon::now()->toDateString())
+                                              ->sum('commission_amount');
+
+            return view('reports.commission.index', compact('totalCommission', 'thisMonthCommission', 'todayCommission'));
         } catch (\Exception $ex) {
             LogHelper::logError('An error occurred while loading the commission index page', $ex->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, '');
             return redirect()->back()->with('error', 'An error occurred while loading the commission list.');
@@ -50,6 +57,8 @@ class AdminCommissionController extends Controller
 
             $data = [];
             $srno = $offset + 1;
+            
+            $totalCommissionLimit = 0;
 
             foreach ($records as $row) {
                 $createdDate = Carbon::parse($row->created_at)->format('d-m-Y h:i A');
@@ -68,13 +77,15 @@ class AdminCommissionController extends Controller
 
                 $data[] = $dataRow;
                 $srno++;
+                $totalCommissionLimit += (float)($row->commission_amount ?? 0);
             }
 
             return response()->json([
                 "draw" => intval($request->draw),
                 "recordsTotal" => $total,
                 "recordsFiltered" => $total,
-                "data" => $data
+                "data" => $data,
+                "totalCommissionLimit" => number_format($totalCommissionLimit, 2)
             ], 200);
 
         } catch (\Exception $ex) {
@@ -142,7 +153,7 @@ class AdminCommissionController extends Controller
                     'Type' => $row->type ?? '-',
                     'Commission Percentage' => $row->commission_percentage ?? '0',
                     'Commission Amount' => $row->commission_amount ?? '0',
-                    'Grand Total' => $row->grand_total ?? '0',
+                    'Order Amount' => $row->grand_total ?? '0',
                     'Date' => $createdDate,
                 ];
             }
@@ -216,7 +227,7 @@ class AdminCommissionController extends Controller
                                     <th>Type</th>
                                     <th>Commission %</th>
                                     <th>Commission Amount</th>
-                                    <th>Grand Total</th>
+                                    <th>Order Amount</th>
                                     <th>Date</th>
                                 </tr>
                             </thead>';
