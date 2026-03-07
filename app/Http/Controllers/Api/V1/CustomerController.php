@@ -45,7 +45,7 @@ use App\Classes\Phonepe;
 
 class CustomerController extends Controller
 {
-    
+
 
 	/*
 	*  seemashelar@neosao
@@ -208,7 +208,7 @@ class CustomerController extends Controller
 
 
 	//seemashelar@neosao
-	//Resend otp 
+	//Resend otp
 	public function resend_otp(Request $r)
 	{
 		try {
@@ -270,7 +270,7 @@ class CustomerController extends Controller
 
 
 	//seemashelar@neosao
-	//customer register 
+	//customer register
 
 	public function customer_register(Request $r)
 	{
@@ -419,6 +419,8 @@ class CustomerController extends Controller
 	public function login(Request $r)
 	{
 		try {
+
+           return response()->json(["status" => 300, "message" => "Maintenance Notice: This app is currently under maintenance and will be unavailable for the next few days. Thank you for your patience."], 200);
 			// Get all input data from the request
 			$input = $r->all();
 
@@ -428,7 +430,7 @@ class CustomerController extends Controller
                 'device'=>'nullable',
 			]);
 
-			// Check if validation fails 
+			// Check if validation fails
 			if ($validator->fails()) {
 				// Return error response with validation message
 				$response = [
@@ -437,12 +439,12 @@ class CustomerController extends Controller
 				];
 				return response()->json($response, 200);
 			}
-          
-            
+
+
 			/*if($r->device=="android"){
 				return response()->json(['status' => 300, 'message' => 'Maintenance Notice: This app is currently under maintenance and will be unavailable for the next few days. Thank you for your patience.'], 200);
 			}*/
-			
+
 
 			// Check if the mobile number exists in the Customer table and is active (not deleted)
 			$result = Customer::where("customer_phone", $r->mobileNumber)
@@ -522,7 +524,7 @@ class CustomerController extends Controller
 
 
 	//seemashelar@neosao
-	//verify otp with mobile number 
+	//verify otp with mobile number
 
 	public function verify_otp(Request $r)
 	{
@@ -594,10 +596,10 @@ class CustomerController extends Controller
 					$data['customerWallet'] = $result->customer_referral_wallet;
 					$data['referralCode'] = $result->customer_referral_code ?? "";
 					$data['firebaseToken'] = $result->customer_firebase_token ?? "";
-					//success log 
+					//success log
 					LogHelper::logSuccess('The customer verify otp successfully while login.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->mobileNumber);
 
-					// Return success response with user data and token 
+					// Return success response with user data and token
 					return response()->json(['status' => 200, 'message' => 'OTP Verified and Logged in successfully', "result" => $data, "token" => $token, 'accountExist' => 1], 200);
 				}
 
@@ -689,7 +691,7 @@ class CustomerController extends Controller
 					Rule::unique('customers', 'customer_email')->where(function ($query) use ($id) {
 						$query->where('is_delete', '0')
 							->where('id', '!=', $id);
-					}),   // Ensure email is unique and not marked as deleted 
+					}),   // Ensure email is unique and not marked as deleted
 				],
 				'profilePhoto' => 'nullable|file|mimes:jpg,png,jpeg|max:2048'
 			], [
@@ -741,7 +743,7 @@ class CustomerController extends Controller
 					$data["customer_avatar"] = $path; // Save the image name in the database
 				}
 
-				//customer update 
+				//customer update
 				$result = $customer->update($data);
 				if ($result == true) {
 					//success log
@@ -763,7 +765,7 @@ class CustomerController extends Controller
 		} catch (\Exception $e) {
 			//log error
 			LogHelper::logError('An error occurred while the getting customer update data.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, "");
-			// Catch any exceptions and return an error response 
+			// Catch any exceptions and return an error response
 			return response()->json(['status' => 400, 'message' => 'Something went wrong.'], 400);
 		}
 	}
@@ -797,7 +799,7 @@ class CustomerController extends Controller
 			$customer = Customer::where("id", $r->customerId)->first();
 			if (!empty($customer)) {
 				$customer->tokens()->delete();
-				//success log 
+				//success log
 				LogHelper::logSuccess('The customer logged out successfully.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->customerId);
 				//success response
 				return response()->json(["status" => 200, "message" => "Logged out."], 200);
@@ -1592,7 +1594,7 @@ class CustomerController extends Controller
 		}
 	}
 
-	// book trip 
+	// book trip
 	public function book_trip(Request $r)
 	{
 		try {
@@ -1641,7 +1643,7 @@ class CustomerController extends Controller
 				];
 				return response()->json($response, 200);
 			}
-			//coupon checking if session is out or customer book trip after fews days later  
+			//coupon checking if session is out or customer book trip after fews days later
 			if ($r->couponId != "") {
 				$calculate_amount = $this->calculate_amount($r->couponId, $r->amount);
 			} else {
@@ -1677,7 +1679,7 @@ class CustomerController extends Controller
 			$result = $trip->save();
 			if ($result) {
 
-				//phonepe payment gateway 
+				//phonepe payment gateway
 
 				if ($r->paymentOption == "online") {
 
@@ -1819,7 +1821,7 @@ class CustomerController extends Controller
 
 				if($drivers && count($drivers)){
 					foreach($drivers as $item){
-						
+
 					}
 				}	*/
 
@@ -1830,19 +1832,19 @@ class CustomerController extends Controller
 					if(!empty($customer->customer_firebase_token)){
 						$statusMessage = "Trip booked successfully.";
 			            $title = "Trip Booked";
-						
+
 						$DeviceIdsArr[] = $customer->customer_firebase_token;
 						$dataArr = array();
 						$dataArr['device_id'] = $DeviceIdsArr;
 						$dataArr['message'] = $statusMessage;
-						$dataArr['title'] = $title;					
+						$dataArr['title'] = $title;
 						$notification['device_id'] = $DeviceIdsArr;
 						$notification['message'] = $statusMessage;
-						$notification['title'] = $title;		  			
+						$notification['title'] = $title;
 						$noti = new Notificationlibv_3;
-						$result = $noti->sendNotification($dataArr, $notification); 
-						Log::info("Trip booked notification result", ['result' => $result]); 
-					}					
+						$result = $noti->sendNotification($dataArr, $notification);
+						Log::info("Trip booked notification result", ['result' => $result]);
+					}
 				}*/
 
 				//send otp for customer
@@ -2684,10 +2686,10 @@ class CustomerController extends Controller
 					default => 'Unknown payment status.',
 				};
 
-				/*$transaction = CustomerWalletTransaction::where("payment_id",$r->merchantOrderId)->first();					
+				/*$transaction = CustomerWalletTransaction::where("payment_id",$r->merchantOrderId)->first();
 				$paymentData=["payment_status"=>strtolower($status),"status"=>strtolower($status)];
 				$transaction->update($paymentData);
-				
+
 				if($status=="COMPLETED"){
 					$customer->customer_wallet_balance += $transaction->amount;
 					$customer->save();
@@ -2917,14 +2919,14 @@ class CustomerController extends Controller
 			}
 
 			$trip = Trip::find($input['tripId']);
-          
+
             if($trip->trip_status=="cancelled"){
                return response()->json(["status" => 300, "message" => "Trip is already cancelled."], 200);
             }
 			$trip->trip_status = "cancelled";
 			$trip->save();
 
-			//save trip status in trip status				
+			//save trip status in trip status
 			$tripStatus = new TripStatus;
 			$tripStatus->trip_id = $trip->id;
 			$tripStatus->trip_status_title = "cancelled";
@@ -3224,7 +3226,7 @@ class CustomerController extends Controller
 					default => 'Unknown payment status.',
 				};
 
-				/*$trip = Trip::find($r->tripId);					
+				/*$trip = Trip::find($r->tripId);
 				$paymentData=["trip_payment_status"=>strtolower($status)];
 				$trip->update($paymentData);*/
 
@@ -3262,7 +3264,7 @@ class CustomerController extends Controller
 	public function check_user_status(Request $r)
 	{
 		try {
-           // return response()->json(["status" => 300, "message" => "Maintenance Notice: This app is currently under maintenance and will be unavailable for the next few days. Thank you for your patience."], 200);
+            return response()->json(["status" => 300, "message" => "Maintenance Notice: This app is currently under maintenance and will be unavailable for the next few days. Thank you for your patience."], 200);
 			$input = $r->all();
 			$validator = Validator::make($input, [
 				'mobileNumber' => 'required|digits:10|numeric',
