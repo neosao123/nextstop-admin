@@ -316,7 +316,7 @@ class DriverController extends Controller
         return $randomString;
     }
     //seemashelar@neosao
-    //Resend otp 
+    //Resend otp
     public function resend_otp(Request $r)
     {
         try {
@@ -382,6 +382,8 @@ class DriverController extends Controller
     public function login(Request $r)
     {
         try {
+
+            return response()->json(["status" => 300, "message" => "Maintenance Notice: This app is currently under maintenance and will be unavailable for the next few days. Thank you for your patience."], 200);
             // Get all input data from the request
             $input = $r->all();
 
@@ -400,7 +402,7 @@ class DriverController extends Controller
                 ];
                 return response()->json($response, 200);
             }
-          
+
            /* if($r->device=="android"){
 				return response()->json(['status' => 300, 'message' => 'Maintenance Notice: This app is currently under maintenance and will be unavailable for the next few days. Thank you for your patience.'], 200);
 			}*/
@@ -413,11 +415,11 @@ class DriverController extends Controller
 
             // If the driver is found and active
             if (!empty($result)) {
-              
+
                  if ($result->is_driver_block == 1) {
                         return response()->json(['status' => 500, 'message' => 'Your account is blocked by admin. Please contact the administrator for assistance.'], 200);
                  }
-                
+
                 // Generate OTP for the mobile number
                 $otpNumber = $this->generateOTP($r->mobileNumber);
                 // $otpNumber = "123456";
@@ -462,7 +464,7 @@ class DriverController extends Controller
                 }
                 // Generate OTP for the mobile number
                 $otpNumber = $this->generateOTP($r->mobileNumber);
-                
+
 
                 // Optional: Skip sending OTP for specific number
                 if (!in_array($r->mobileNumber, $this->testingMobileNumbers)) {
@@ -486,7 +488,7 @@ class DriverController extends Controller
         }
     }
     //seemashelar@neosao
-    //verify otp with mobile number 
+    //verify otp with mobile number
 
     public function verify_otp(Request $r)
     {
@@ -572,10 +574,10 @@ class DriverController extends Controller
                     $verificationStatus = ($result->admin_verification_status == 1 && $result->driver_document_verification_status == 1 && $result->driver_vehicle_verification_status == 1 && $result->driver_vehicle_document_verification_status == 1 && $result->driver_training_video_verification_status == 1) ? 1 : 0;
                     //$data['status'] = json_decode(stripcslashes($result->porter_status)) ?? "";
 
-                    //success log 
+                    //success log
                     LogHelper::logSuccess('The Partner verify otp successfully while login.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->mobileNumber);
 
-                    // Return success response with user data and token 
+                    // Return success response with user data and token
                     return response()->json(['status' => 200, 'message' => 'OTP Verified and Logged in successfully', "result" => $data, "token" => $token, 'verificationStatus' => $verificationStatus, 'accountExist' => 1], 200);
                 }
 
@@ -858,7 +860,7 @@ class DriverController extends Controller
     }
 
 
-    /* 
+    /*
 	*  seemashelar@neosao
 	*  Three step register for driver
 	*  1) document register
@@ -870,7 +872,7 @@ class DriverController extends Controller
         try {
             $input = $r->all();
 
-            // Validation rules 
+            // Validation rules
             $validator = Validator::make($input, [
                 // Bank Details
                 'driverId' => 'required|integer',
@@ -879,7 +881,7 @@ class DriverController extends Controller
                 'bankIfscCode' => 'required|regex:/^[A-Z]{4}0[A-Z0-9]{6}$/',
                 'branchName' => 'required|max:255',
 
-                // PAN card validation 
+                // PAN card validation
                 'document.pan_card.file' => 'nullable|file|mimes:jpg,png,pdf,doc,docx|max:10240',
                 'document.pan_card.number' => 'nullable|regex:/^[A-Z]{5}[0-9]{4}[A-Z]$/',
 
@@ -1071,7 +1073,7 @@ class DriverController extends Controller
             }
             if ($result) {
                 $getDriver = Driver::where("id", $r->driverId)->first();
-                //update status 1 for document details in first step 
+                //update status 1 for document details in first step
                 if (!empty($getDriver)) {
                     $status = json_decode($getDriver->driver_status, true);
                     if ($status["document_details"] == 0) {
@@ -1095,13 +1097,13 @@ class DriverController extends Controller
             //log error
             LogHelper::logError('An error occurred while the partner register personal documents.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->driverId);
 
-            // Catch any exceptions and return an error response 
+            // Catch any exceptions and return an error response
             return response()->json(['status' => 400, 'message' => 'Something went wrong'], 400);
         }
     }
 
     //seemashelar@neosao
-    //This api will get vehicle which is used for vehicle register api 
+    //This api will get vehicle which is used for vehicle register api
 
     public function vehicles(Request $request)
     {
@@ -1200,7 +1202,7 @@ class DriverController extends Controller
                 'vehiclePhoto.max' => 'The vehicle photo file size must not exceed 10MB.',
             ]);
 
-            // Check if validation fails 
+            // Check if validation fails
             if ($validator->fails()) {
                 // Return error response with validation message
                 $response = [
@@ -1224,13 +1226,13 @@ class DriverController extends Controller
                 $driverVehicleDetails->vehicle_photo = $path;
             }
 
-            // Create a new vehicle details record in the database 
+            // Create a new vehicle details record in the database
             $result = $driverVehicleDetails->save();
 
             if ($result) {
 
                 $getDriver = Driver::where("id", $r->driverId)->first();
-                //update status 1 for vehicle details in first step 
+                //update status 1 for vehicle details in first step
                 if (!empty($getDriver)) {
                     $status = json_decode($getDriver->driver_status, true);
                     if ($status["vehicle_details"] == 0) {
@@ -1244,7 +1246,7 @@ class DriverController extends Controller
                 //success log
                 LogHelper::logSuccess('The partner register vehicle details successfully.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->driverId);
 
-                //Return Success response 
+                //Return Success response
                 return response()->json(['status' => 200, 'message' => 'Data added successfully'], 200);
             }
             //log error
@@ -1257,7 +1259,7 @@ class DriverController extends Controller
             //log error
             LogHelper::logError('An error occurred while the partner register vehicle details.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, "");
 
-            // Catch any exceptions and return an error response 
+            // Catch any exceptions and return an error response
             return response()->json(['status' => 400, 'message' => 'Something went wrong'], 400);
         }
     }
@@ -1295,7 +1297,7 @@ class DriverController extends Controller
                     array_push($videoArray, $data);
                 }
 
-                //return success response 
+                //return success response
                 return response()->json([
                     'status' => 200,
                     'message' => 'Data Found',
@@ -1309,13 +1311,13 @@ class DriverController extends Controller
                 'message' => 'Data Not Found',
             ], 200);
         } catch (\Exception $e) {
-            // Catch any exceptions and return an error response 
+            // Catch any exceptions and return an error response
             return response()->json(['status' => 400, 'message' => 'Something went wrong'], 400);
         }
     }
 
     //seemashelar@neosao
-    //This Api is used for third step registration for partner i.e training video seen 
+    //This Api is used for third step registration for partner i.e training video seen
     public function training_video_details(Request $r)
     {
         try {
@@ -1332,7 +1334,7 @@ class DriverController extends Controller
                 'videoId.integer' => 'The video ID must be a valid integer.'
             ]);
 
-            // Check if validation fails 
+            // Check if validation fails
             if ($validator->fails()) {
                 // Return error response with validation message
                 $response = [
@@ -1367,7 +1369,7 @@ class DriverController extends Controller
                     LogHelper::logSuccess('The partner seen training video.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->driverId);
 
                     $getDriver = Driver::where("id", $r->driverId)->first();
-                    //update status 1 for training video in first step 
+                    //update status 1 for training video in first step
                     if (!empty($getDriver)) {
                         $status = json_decode($getDriver->driver_status, true);
 
@@ -1388,27 +1390,27 @@ class DriverController extends Controller
                         //}
                     }
 
-                    //Return Success response 
+                    //Return Success response
                     return response()->json(['status' => 200, 'message' => 'Training video seen successfully'], 200);
                 }
                 //log error
                 LogHelper::logError('An error occurred while the partner seen training video.', 'Failed to seen training video.',  __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, '');
 
-                //Return Failure response 
+                //Return Failure response
                 return response()->json(['status' => 300, 'message' => 'Failed to seen training video.'], 200);
             }
-            //Return Success response 
+            //Return Success response
             return response()->json(['status' => 200, 'message' => 'You already seen this training video'], 200);
         } catch (\Exception $e) {
             //log error
             LogHelper::logError('An error occurred while the partner seen training video.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, "");
-            // Catch any exceptions and return an error response 
+            // Catch any exceptions and return an error response
             return response()->json(['status' => 400, 'message' => 'Something went wrong'], 400);
         }
     }
 
     //seemashelar@neosao
-    //This Api is used to get all register data of partner  
+    //This Api is used to get all register data of partner
 
     public function driver_register_info(Request $r)
     {
@@ -1424,7 +1426,7 @@ class DriverController extends Controller
                 'driverId.integer' => 'The partner ID must be a valid integer.',
             ]);
 
-            // Check if validation fails 
+            // Check if validation fails
             if ($validator->fails()) {
                 // Return error response with validation message
                 $response = [
@@ -1459,10 +1461,10 @@ class DriverController extends Controller
 
                 //get Bank Details
                 $getBankDetails = DriverBankDetails::where("driver_id", $r->driverId)->first();
-                //get vehicle details 
+                //get vehicle details
 
                 $driver_vehicle_details = DriverVehicleDetails::with('vehicle')->where('driver_id', $r->driverId)->where('is_delete', 0)->first();
-                //get training video details 
+                //get training video details
 
                 $training_video_details = DriverTrainingVideo::where("driver_id", $r->driverId)->first();
 
@@ -1522,7 +1524,7 @@ class DriverController extends Controller
                         "vehicleReason" => $driver_vehicle_details->vehicle_verification_reason ?? "",
                     ];
                 }
-                //get video details 
+                //get video details
                 if (!empty($driver_training_video_details)) {
                     $trainingVideo = [];
                     foreach ($driver_training_video_details as $item) {
@@ -1545,10 +1547,10 @@ class DriverController extends Controller
                         'videoReason' => $training_video_details->training_video_verification_reason ?? "",
                     ];
                 }
-                //success log 
+                //success log
                 LogHelper::logSuccess('The partner register data get successfully.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $result->id);
 
-                // Return success response with user data 
+                // Return success response with user data
                 return response()->json(['status' => 200, 'message' => 'Data found', "result" => $data], 200);
             }
             //log error
@@ -1559,7 +1561,7 @@ class DriverController extends Controller
         } catch (\Exception $e) {
             //log error
             LogHelper::logError('An error occurred while the getting partner register data.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, "");
-            // Catch any exceptions and return an error response 
+            // Catch any exceptions and return an error response
             return response()->json(['status' => 400, 'message' => 'Something went wrong'], 400);
         }
     }
@@ -1602,7 +1604,7 @@ class DriverController extends Controller
         } catch (\Exception $e) {
             //log error
             LogHelper::logError('An error occurred while the getting partner delete.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, "");
-            // Catch any exceptions and return an error response 
+            // Catch any exceptions and return an error response
             return response()->json(['status' => 400, 'message' => 'Something went wrong'], 400);
         }
     }
@@ -1682,7 +1684,7 @@ class DriverController extends Controller
                     $data["driver_photo"] = $path; // Save the image name in the database
                 }
 
-                //driver update 
+                //driver update
                 $result = $driver->update($data);
                 if ($result == true) {
                     //success log
@@ -1704,19 +1706,19 @@ class DriverController extends Controller
         } catch (\Exception $e) {
             //log error
             LogHelper::logError('An error occurred while the getting partner update data.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, "");
-            // Catch any exceptions and return an error response 
+            // Catch any exceptions and return an error response
             return response()->json(['status' => 400, 'message' => 'Something went wrong.'], 400);
         }
     }
 
     //seemashelar@neosao
-    //update first step of driver as document register /bank info 
+    //update first step of driver as document register /bank info
     public function document_update(Request $r)
     {
         try {
             $input = $r->all();
 
-            // Validation rules 
+            // Validation rules
             $validator = Validator::make($input, [
                 // Bank Details
                 'driverId' => 'required|integer',
@@ -1840,7 +1842,7 @@ class DriverController extends Controller
                 $driver->driver_vehicle_document_verification_status = 1;
                 $driver->save();
 
-                // Bank details data			
+                // Bank details data
                 $bank_details = DriverBankDetails::where('driver_id', $r->driverId)->first();
                 $bank_details->driver_bank_name = $r->bankName;
                 $bank_details->driver_bank_account_number = $r->bankAccountNumber;
@@ -2015,12 +2017,12 @@ class DriverController extends Controller
             //log error
             LogHelper::logError('An error occurred while the partner update personal documents.', $e->getMessage(), __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->driverId);
 
-            // Catch any exceptions and return an error response 
+            // Catch any exceptions and return an error response
             return response()->json(['status' => 400, 'message' => 'Something went wrong'], 400);
         }
     }
     //seemashelar@neosao
-    //update vehicle data 
+    //update vehicle data
     public function vehicle_update(Request $r)
     {
         try {
@@ -2152,7 +2154,7 @@ class DriverController extends Controller
             $driver = Driver::where("id", $r->driverId)->first();
             if (!empty($driver)) {
                 $driver->tokens()->delete();
-                //success log 
+                //success log
                 LogHelper::logSuccess('The partner logged out successfully.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->driverId);
                 //success response
                 return response()->json(["status" => 200, "message" => "Logged out."], 200);
@@ -2172,6 +2174,7 @@ class DriverController extends Controller
     public function check_driver_status(Request $r)
     {
         try {
+            return response()->json(["status" => 300, "message" => "Maintenance Notice: This app is currently under maintenance and will be unavailable for the next few days. Thank you for your patience."], 200);
             $input = $r->all();
             $validator = Validator::make($input, [
                 // Vehicle Details
@@ -2412,7 +2415,7 @@ class DriverController extends Controller
                 // Return error response
                 return response()->json(["status" => 300, "message" => "Trip not found"], 200);
             }
-			
+
 			if ($trip->trip_status == "cancelled") {
                 return response()->json(["status" => 300, "message" => "Trip is already cancelled."], 200);
             }
@@ -2496,7 +2499,7 @@ class DriverController extends Controller
             return response()->json(['status' => 400, 'message' => 'Something went wrong.' . $e->getMessage()], 400);
         }
     }
-  
+
     public function trip_details(Request $r)
     {
         try {
@@ -2727,7 +2730,7 @@ class DriverController extends Controller
 
                 //if ($input['paymentType'] === 'cod')
                 //{
-                //driver earning				
+                //driver earning
                 $getAdminCommission = Setting::where("id", 4)->first();
                 $commission = 0;
 
@@ -2806,7 +2809,7 @@ class DriverController extends Controller
                 ]));
 
 
-                //send notification to customer 
+                //send notification to customer
 
                 $customer = Customer::find($trip->trip_customer_id);
                 if (!empty($customer)) {
@@ -3236,7 +3239,7 @@ class DriverController extends Controller
 
             // Check if validation fails
             if ($validator->fails()) {
-                // Return error response with validation message 
+                // Return error response with validation message
                 $response = [
                     "status" => 500,
                     "message" => $validator->errors()->first()
@@ -3266,7 +3269,7 @@ class DriverController extends Controller
             $trip->trip_status = "pending";
             $trip->save();
 
-            //save trip status in trip status				
+            //save trip status in trip status
             $tripStatus = new TripStatus;
             $tripStatus->trip_id = $trip->id;
             $tripStatus->trip_status_title = "cancelled";
@@ -3679,10 +3682,10 @@ class DriverController extends Controller
                 ];
                 return response()->json($response, 200);
             } else {
-                //success log 
+                //success log
                 LogHelper::logSuccess('The partner verify otp successfully while pickup.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->mobileNumber);
 
-                // Return success response with user data and token 
+                // Return success response with user data and token
                 return response()->json(['status' => 200, 'message' => 'OTP verified successfully'], 200);
             }
         } catch (\Exception $e) {
@@ -3811,13 +3814,13 @@ class DriverController extends Controller
                 ];
                 return response()->json($response, 200);
             } else {
-                //success log 
+                //success log
                 LogHelper::logSuccess('The partner verify otp successfully while pickup.', __FUNCTION__, basename(__FILE__), __LINE__, __FILE__, $r->mobileNumber);
 
 
 
 
-                // Return success response with user data and token 
+                // Return success response with user data and token
                 return response()->json(['status' => 200, 'message' => 'OTP verified successfully'], 200);
             }
         } catch (\Exception $e) {
@@ -4108,13 +4111,13 @@ class DriverController extends Controller
                     default => 'Unknown payment status.',
                 };
 
-                /*$driverEarning = DriverEarning::where("payment_id",$r->merchantOrderId)->first();					
+                /*$driverEarning = DriverEarning::where("payment_id",$r->merchantOrderId)->first();
 				$paymentData=["payment_status"=>strtolower($status),"status"=>strtolower($status)];
 				$driverEarning->update($paymentData);
-				
+
 				if($status=="COMPLETED"){
 					$driver->driver_wallet += $driverEarning->amount;
-					$driver->save(); 
+					$driver->save();
 				}*/
                 LogHelper::logSuccess('Partner wallet updated successfully', [
                     'driver_id' => $r->driverId,
